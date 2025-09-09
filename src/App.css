@@ -1,38 +1,871 @@
-.App {
+/* src/App.css */
+
+/* Global Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f0f2f5; /* Light gray background */
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.header {
   text-align: center;
+  color: #2c3e50; /* Darker blue-gray */
+  margin-bottom: 40px;
+  font-size: 2.2em;
+  font-weight: 700;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Mode Toggle Buttons */
+.mode-toggle-container {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  padding: 10px;
+  background-color: #f8f9fa; /* Lighter background for buttons */
+  border-radius: 8px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.mode-button {
+  background-color: #e9ecef; /* Light gray for inactive */
+  color: #495057;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  flex-grow: 1; /* Make buttons expand */
+  text-align: center;
+  max-width: 250px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.mode-button.active-mode {
+  background-color: #007bff; /* Primary blue for active */
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.mode-button:hover:not(.active-mode) {
+  background-color: #d1d9e2;
+  color: #34495e;
+}
+
+/* Form for Adding New Item (Planning Mode) */
+.add-item-form {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  gap: 15px;
+  margin-bottom: 30px;
+  padding: 25px;
+  background-color: #e9f5ff; /* Lighter blue */
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  align-items: center;
+  position: relative; /* For error message positioning */
+}
+
+.item-name-input,
+.quantity-input,
+.unit-select,
+.priority-select {
+  padding: 12px 15px;
+  border: 1px solid #cce0ff; /* Light blue border */
+  border-radius: 8px;
+  font-size: 1em;
+  flex: 1; /* Adjust flex grow based on need */
+  min-width: 80px; /* Base min-width */
+}
+
+.item-name-input {
+  flex-grow: 3; /* Item name gets more space */
+  min-width: 150px;
+}
+
+.quantity-input {
+  flex-grow: 0.8; /* Quantity input */
+  min-width: 60px;
+  text-align: right; /* Numbers align right */
+}
+
+.unit-select {
+  flex-grow: 1; /* Unit select */
+  min-width: 90px;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.priority-select {
+  flex-grow: 1; /* Priority select */
+  min-width: 120px;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+
+.add-button {
+  background-color: #007bff; /* Primary blue */
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  flex: 1; /* Take appropriate space */
+  min-width: 150px;
+}
+
+.add-button:hover {
+  background-color: #0056b3;
+}
+
+.add-item-form-error { /* NEW style for top form errors */
+  position: absolute;
+  bottom: -25px; /* Adjust as needed */
+  left: 15px;
+  width: calc(100% - 30px);
+  font-size: 0.9em;
+  color: #dc3545;
+}
+
+
+/* List Container (Both Modes) */
+.list-container {
   display: flex;
   flex-direction: column;
+  gap: 25px;
+}
+
+.empty-list-message {
+  text-align: center;
+  padding: 40px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  color: #6c757d;
+  font-size: 1.1em;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+}
+
+/* Item Card (Base Style) */
+.item-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e6ed;
+  border-radius: 10px;
+  padding: 20px 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.item-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #e9ecef; /* Lighter border for separation */
+  flex-wrap: wrap; /* Allow content to wrap */
+  gap: 10px;
+}
+
+.item-name {
+  margin: 0;
+  font-size: 1.5em;
+  color: #34495e; /* Darker text */
+  display: flex;
+  align-items: center;
+  flex-grow: 1; /* Allows it to take available space */
+  min-width: 50%; /* Ensures it has space before wrapping */
+}
+
+.item-quantity-display { /* NEW */
+  font-size: 0.8em;
+  font-weight: normal;
+  color: #555;
+  margin-left: 8px;
+  white-space: nowrap; /* Prevent line break for quantity */
+}
+
+.priority-tag {
+  font-size: 0.85em;
+  padding: 5px 12px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 700;
+  margin-left: 15px;
+  display: inline-block; /* Ensures padding/margins are respected */
+  white-space: nowrap; /* Prevent priority tag from wrapping */
+}
+
+/* Priority Colors */
+.priority-alta { background-color: #dc3545; } /* Red */
+.priority-media { background-color: #ffc107; color: #333; } /* Yellow, contrast for text */
+.priority-baixa { background-color: #28a745; } /* Green */
+
+.item-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.action-button {
+  background-color: #6c757d; /* Gray */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  width: 38px; /* Fixed width/height for icon buttons */
+  height: 38px;
+  cursor: pointer;
+  font-size: 1.1em;
+  display: flex;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: #5a6268;
+}
+
+.edit-button {
+  background-color: #17a2b8; /* Info blue */
+}
+.edit-button:hover {
+  background-color: #138496;
+}
+
+.delete-button {
+  background-color: #dc3545; /* Danger red */
+}
+.delete-button:hover {
+  background-color: #c82333;
+}
+
+/* Edit Mode for Item (Planning Mode) - NEW FLEX CONTAINER FOR EDITS */
+.item-edit-mode-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  flex-grow: 1;
+  position: relative; /* For error message */
+}
+.edit-input, .edit-select {
+  padding: 8px 10px;
+  border: 1px solid #b3d9ff;
+  border-radius: 5px;
+  font-size: 1.1em;
+  background-color: #ffffff;
+}
+
+.item-name-edit {
+  flex-basis: 100%; /* Take full width initially */
+  order: 1; /* Order it first */
+}
+
+.quantity-unit-edit-group { /* NEW grouping for quantity and unit */
+  display: flex;
+  gap: 8px;
+  flex-grow: 1;
+  order: 2;
+}
+.quantity-edit-input {
+  flex-basis: 60px; /* Small fixed width for quantity */
+  text-align: right;
+  min-width: 60px;
+  max-width: 100px;
+}
+.unit-edit-select {
+  flex-grow: 1;
+  min-width: 80px;
+}
+.priority-edit-select {
+  flex-grow: 1;
+  order: 3;
+  min-width: 100px;
+}
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  order: 4;
+  margin-left: auto; /* Push to the right */
+  white-space: nowrap; /* Keep buttons together */
+}
+
+.save-button, .cancel-button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease;
+}
+
+.save-button {
+  background-color: #28a745; /* Success green */
   color: white;
 }
-
-.App-link {
-  color: #61dafb;
+.save-button:hover {
+  background-color: #218838;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.cancel-button {
+  background-color: #6c757d; /* Secondary gray */
+  color: white;
+}
+.cancel-button:hover {
+  background-color: #5a6268;
+}
+
+.edit-error-message { /* NEW */
+  position: static; /* Within the flex flow */
+  flex-basis: 100%; /* Takes full width for error */
+  order: 2.5; /* Position after quantity/unit inputs */
+  margin-top: -5px; /* Adjust spacing */
+}
+
+/* Market Prices Section (Planning Mode) */
+.market-prices h4 {
+  color: #495057; /* Dark gray */
+  margin-top: 15px;
+  margin-bottom: 10px;
+  border-bottom: 1px dashed #e9ecef;
+  padding-bottom: 8px;
+}
+
+.no-prices-text {
+  font-style: italic;
+  color: #7f8c8d; /* Muted gray */
+  margin-left: 10px;
+}
+
+.market-prices ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.market-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dotted #f0f0f0;
+  color: #555;
+  font-size: 0.95em;
+}
+.market-item:last-child {
+  border-bottom: none;
+}
+
+.market-details {
+  flex-grow: 1;
+}
+
+.price-value {
+  font-weight: bold;
+  color: #007bff; /* Primary blue for price */
+}
+
+.delete-market-price-button {
+  background-color: #dc3545; /* Danger red */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 0.75em;
+  transition: background-color 0.3s ease;
+}
+.delete-market-price-button:hover {
+  background-color: #c82333;
+}
+
+/* Cheapest Market Info (Planning Mode) */
+.cheapest-market-info {
+  margin-top: 20px;
+  padding: 12px 18px;
+  background-color: #d4edda; /* Light green success background */
+  color: #155724; /* Dark green success text */
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.1em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cheapest-market-name {
+  color: #0d3615; /* Even darker green for emphasis */
+}
+
+.cheapest-price-value {
+  color: #006400; /* Darker green */
+}
+
+.best-price-indicator {
+  font-size: 1.4em;
+  margin-left: 10px;
+  color: #218838;
+}
+
+/* Add Market Price Form (Planning Mode) */
+.add-market-price-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+  position: relative; /* For error message positioning */
+}
+
+.market-input,
+.price-input {
+  flex-grow: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95em;
+  min-width: 100px;
+}
+
+.add-price-button {
+  background-color: #28a745; /* Success green */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  min-width: 100px;
+}
+.add-price-button:hover {
+  background-color: #218838;
+}
+
+/* Error Handling */
+.input-error {
+  border-color: #dc3545 !important; /* Red border for errors */
+  box-shadow: 0 0 0 0.1rem rgba(220,53,69,.25) !important;
+}
+
+.input-error-message {
+  color: #dc3545;
+  font-size: 0.85em;
+  margin-top: 5px;
+  position: absolute; /* Position below inputs */
+  bottom: -20px; /* Adjust as needed */
+  left: 0;
+  width: 100%;
+  text-align: left;
+}
+/* Adjust specific for top add item form error */
+.add-item-form .input-error-message {
+  bottom: -15px;
+  left: 15px;
+  width: calc(100% - 30px);
+  position: absolute;
+  z-index: 10;
+}
+.edit-error-message {
+  position: static;
+  margin-top: 5px;
+}
+
+
+/* Market Mode Specific Styles */
+.market-mode-view {
+  padding-top: 20px;
+}
+
+.current-market-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 20px;
+  background-color: #e6f7ff; /* Light blue background for market selector */
+  border: 1px solid #b3e0ff;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  align-items: center;
+}
+
+.current-market-input {
+  flex-grow: 1;
+  padding: 12px 15px;
+  border: 1px solid #a3d0ff; /* Light blue border */
+  border-radius: 8px;
+  font-size: 1em;
+  min-width: 180px;
+}
+
+.set-market-button,
+.clear-market-button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  white-space: nowrap; /* Prevent text wrap */
+}
+
+.set-market-button {
+  background-color: #007bff; /* Primary blue */
+  color: white;
+}
+.set-market-button:hover {
+  background-color: #0056b3;
+}
+
+.clear-market-button {
+  background-color: #6c757d; /* Secondary gray */
+  color: white;
+}
+.clear-market-button:hover {
+  background-color: #5a6268;
+}
+
+.market-mode-instruction {
+  text-align: center;
+  padding: 20px;
+  background-color: #f8f9fa; /* Info blue light */
+  border-radius: 8px;
+  color: #6c757d;
+  font-size: 1em;
+  margin-top: -10px; /* Pull it closer to the input field */
+  margin-bottom: 25px;
+  border: 1px solid #e9ecef;
+}
+
+.market-mode-info {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #d1ecf1; /* Info blue light */
+  border: 1px solid #bee5eb;
+  border-radius: 10px;
+}
+
+.market-mode-info p {
+  margin: 0 0 10px 0;
+  font-size: 1.1em;
+  color: #0c5460;
+}
+
+.market-mode-total {
+  font-size: 2.5em;
+  color: #28a745; /* Success green */
+  margin: 0;
+  font-weight: 700;
+}
+.market-mode-total span {
+  font-weight: 900;
+}
+
+/* Styling for item cards in Market Mode */
+.market-mode-card {
+  border-left: 8px solid #007bff; /* Blue prominent border to signify market mode card */
+  padding: 15px 20px; /* Slightly less padding to keep it compact */
+}
+
+.market-mode-header {
+  justify-content: flex-start; /* Align items to start */
+  gap: 15px;
+  align-items: center;
+}
+
+.item-cart-checkbox {
+  width: 25px;
+  height: 25px;
+  min-width: 25px; /* Prevent shrinking */
+  min-height: 25px;
+  cursor: pointer;
+  transform: scale(1.3); /* Make checkbox more prominent */
+  accent-color: #28a745; /* Green checkmark */
+}
+
+.item-name-market-mode {
+  font-size: 1.4em;
+  flex-grow: 1; /* Takes available space */
+  margin-right: 15px; /* Space from priority tag */
+  color: #34495e;
+}
+
+.item-quantity-display-market { /* NEW */
+  font-size: 0.7em;
+  font-weight: normal;
+  color: #777;
+  margin-left: 5px;
+}
+
+
+.market-mode-priority {
+  font-size: 0.9em;
+  padding: 4px 10px;
+  white-space: nowrap; /* Prevent wrap */
+}
+
+.current-market-price-edit {
+  margin-top: 15px;
+  padding: 10px 0;
+  border-bottom: 1px dashed #e9ecef;
+  border-top: 1px dashed #e9ecef;
+  margin-bottom: 15px;
+  position: relative; /* For error message positioning */
+}
+.current-market-price-edit label.current-market-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 8px;
+  flex-wrap: wrap; /* allow wrapping on small screens */
+}
+.current-market-price-edit .market-name-highlight {
+  color: #0056b3; /* Highlight current market name in blue */
+}
+
+
+.market-mode-price-input {
+  padding: 8px 10px;
+  border: 1px solid #b3d9ff;
+  border-radius: 6px;
+  font-size: 1em;
+  flex-grow: 1;
+  min-width: 80px;
+  text-align: right; /* Align numbers to the right */
+}
+/* Error specific to market mode price input */
+.price-error-market-mode {
+  position: static;
+  margin-top: 5px;
+  text-align: right;
+  width: auto;
+  display: block; /* Ensure it takes its own line if needed */
+}
+
+.no-market-selected-text {
+  font-style: italic;
+  color: #888;
+  text-align: center;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+
+.other-market-prices-comparison {
+  margin-top: 15px;
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.other-market-prices-comparison h5 {
+  margin-top: 0;
+  color: #0056b3;
+  border-bottom: 1px dotted #cce0ff;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.other-market-prices-comparison ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.other-market-prices-comparison li {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  color: #555;
+  font-size: 0.9em;
+}
+.other-market-prices-comparison li:not(:last-child) {
+  border-bottom: 1px dotted #e9ecef;
+}
+.no-other-markets-text {
+  font-style: italic;
+  color: #7f8c8d; /* Muted gray */
+  margin-left: 0;
+  text-align: center;
+  padding: 10px 0;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+      margin: 20px 10px;
+      padding: 20px;
   }
-  to {
-    transform: rotate(360deg);
+  .mode-toggle-container {
+      flex-direction: column;
+  }
+  .mode-button {
+      max-width: 100%;
+  }
+  .add-item-form, .current-market-selection {
+      flex-direction: column;
+      align-items: stretch;
+  }
+  /* Adjusted order for form fields on small screens */
+  .item-name-input { order: 1; }
+  .quantity-input { order: 2; }
+  .unit-select { order: 3; }
+  .priority-select { order: 4; }
+  .add-button { order: 5; }
+  .add-item-form-error { order: 6; } /* Error below buttons */
+
+
+  .item-name-input,
+  .quantity-input,
+  .unit-select,
+  .priority-select,
+  .add-button,
+  .current-market-input,
+  .set-market-button,
+  .clear-market-button {
+      width: 100%;
+      min-width: unset;
+  }
+  .item-header {
+      flex-direction: column;
+      align-items: flex-start;
+  }
+  .item-name {
+      margin-bottom: 10px;
+      font-size: 1.3em;
+      width: 100%;
+      justify-content: space-between;
+      align-items: flex-start; /* Keep name + quantity on top */
+      flex-wrap: wrap;
+  }
+  .item-quantity-display {
+      flex-basis: 100%; /* Push quantity below name if it gets too long */
+      margin-left: 0;
+      margin-top: 5px;
+      font-size: 0.9em;
+  }
+  .priority-tag {
+      margin-left: 0;
+      margin-top: 10px; /* Space it from quantity/name */
+  }
+  .add-market-price-form {
+      flex-direction: column;
+  }
+  .market-input,
+  .price-input,
+  .add-price-button {
+      width: 100%;
+      min-width: unset;
+  }
+  .item-edit-mode-container {
+      flex-direction: column;
+      align-items: stretch;
+  }
+  .item-name-edit, .quantity-unit-edit-group, .priority-edit-select, .edit-actions {
+      flex-basis: 100%;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      width: 100%;
+      max-width: unset; /* Override max-width set for desktop */
+  }
+  .quantity-unit-edit-group {
+      flex-direction: row; /* keep these two side-by-side if possible */
+  }
+  .edit-actions {
+      justify-content: stretch; /* Stretch buttons */
+  }
+  .save-button, .cancel-button {
+      flex-grow: 1; /* Make them grow */
+      width: unset;
+      min-width: unset;
+  }
+
+  /* Market Mode Specific Adjustments for smaller screens */
+  .market-mode-info h2 {
+      font-size: 2em;
+  }
+  .market-mode-header {
+      flex-wrap: wrap;
+      flex-direction: row; /* Prefer horizontal flow */
+      justify-content: flex-start;
+      align-items: center;
+  }
+  .item-name-market-mode {
+      font-size: 1.2em;
+      margin-right: 0;
+      margin-bottom: 0px; /* Keep it on the same line if possible */
+      flex-basis: auto; /* Revert to auto */
+      width: auto;
+  }
+  .item-cart-checkbox {
+      order: -1; /* Place checkbox first */
+      margin-right: 10px;
+  }
+  .market-mode-priority {
+      margin-left: auto; /* Push priority to the far right */
+      order: 1;
+      align-self: center; /* Center it vertically */
+  }
+  .current-market-price-edit label.current-market-label {
+      flex-direction: row;
+      flex-wrap: wrap; /* allow to wrap */
+      align-items: center;
+  }
+  .market-mode-price-input {
+      width: 100px; /* Fixed width, let the label text wrap around */
+      flex-grow: 0;
+      margin-left: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .item-edit-mode-container .save-button,
+  .item-edit-mode-container .cancel-button {
+      flex-basis: calc(50% - 5px); /* Ensure save/cancel take roughly half width */
+      margin-left: 0;
+  }
+  .add-item-form-error {
+      text-align: center;
+  }
+  .market-mode-price-input {
+       flex-grow: 1;
+       margin-left: 0;
+       width: 100%;
+  }
+   .current-market-price-edit label.current-market-label {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 5px;
   }
 }
