@@ -1,4 +1,4 @@
-/* src/App.css - Responsividade Aprimorada */
+/* src/App.css - Responsividade Aprimorada com Subcategorias e Busca */
 
 /* Global Styles and Root Font Size */
 :root {
@@ -9,7 +9,7 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 1rem; /* Relative padding */
-  background-color: #f0f2f5;
+  background-color: #f0f2f5; /* Light gray background */
   color: #333;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -17,7 +17,7 @@ body {
 }
 
 .container {
-  max-width: 56.25rem; /* 900px / 16 = 56.25rem */
+  max-width: 56.25rem; /* 900px */
   margin: 2rem auto; /* Relative margin */
   padding: 1.5rem; /* Relative padding */
   background-color: #ffffff;
@@ -27,7 +27,7 @@ body {
 
 .header {
   text-align: center;
-  color: #2c3e50;
+  color: #2c3e50; /* Darker blue-gray */
   margin-bottom: 2.5rem; /* 40px */
   font-size: 2.2rem;
   font-weight: 700;
@@ -36,22 +36,22 @@ body {
 /* Mode Toggle Buttons */
 .mode-toggle-container {
   display: flex;
-  flex-wrap: wrap; /* Allow wrapping */
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 1rem; /* Relative gap */
-  margin-bottom: 1.875rem; /* 30px */
-  padding: 0.625rem; /* 10px */
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.625rem;
   background-color: #f8f9fa;
-  border-radius: 0.5rem; /* 8px */
-  box-shadow: inset 0 0.0625rem 0.1875rem rgba(0,0,0,0.08); /* 1px 3px */
+  border-radius: 0.5rem;
+  box-shadow: inset 0 0.0625rem 0.1875rem rgba(0,0,0,0.08);
 }
 
 .mode-button {
   background-color: #e9ecef;
   color: #495057;
   border: none;
-  border-radius: 0.375rem; /* 6px */
-  padding: 0.75rem 1.25rem; /* 12px 20px */
+  border-radius: 0.375rem;
+  padding: 0.75rem 1.25rem;
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
@@ -65,7 +65,7 @@ body {
 .mode-button.active-mode {
   background-color: #007bff;
   color: white;
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 123, 255, 0.2); /* 4px 12px */
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 123, 255, 0.2);
 }
 
 .mode-button:hover:not(.active-mode) {
@@ -73,16 +73,58 @@ body {
   color: #34495e;
 }
 
+/* NEW: Filter Controls Container (for Search and Subcategory Filter) */
+.filter-controls-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.875rem; /* 30px */
+  padding-bottom: 0.625rem; /* 10px */
+  border-bottom: 1px solid #e9ecef;
+}
+
+.search-input {
+  flex-grow: 2; /* Allow search input to take more space */
+  min-width: 12rem; /* Minimum width */
+  padding: 0.75rem 0.9375rem;
+  border: 1px solid #a3d0ff;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.search-input::placeholder {
+  color: #6c757d;
+}
+.search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.subcategory-filter-select { /* NEW: Style for subcategory filter dropdown */
+  flex-grow: 1; /* Allow dropdown to grow */
+  min-width: 8rem; /* Minimum width */
+  padding: 0.75rem 0.9375rem;
+  border: 1px solid #a3d0ff;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background-color: #ffffff;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+
 /* Form for Adding New Item (Planning Mode) */
 .add-item-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem; /* Relative gap */
-  margin-bottom: 1.875rem; /* 30px */
-  padding: 1.5rem; /* 25px */
+  gap: 1rem;
+  margin-bottom: 1.875rem;
+  padding: 1.5rem;
   background-color: #e9f5ff;
-  border-radius: 0.625rem; /* 10px */
-  box-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.05); /* 2px 10px */
+  border-radius: 0.625rem;
+  box-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.05);
   align-items: center;
   position: relative;
 }
@@ -90,64 +132,67 @@ body {
 .item-name-input,
 .quantity-input,
 .unit-select,
+.subcategory-input,
 .priority-select {
-  padding: 0.75rem 0.9375rem; /* 12px 15px */
+  padding: 0.75rem 0.9375rem;
   border: 1px solid #cce0ff;
-  border-radius: 0.5rem; /* 8px */
+  border-radius: 0.5rem;
   font-size: 1rem;
-  flex: 1; /* Default flex behaviour */
-  min-width: 6rem; /* Min-width for each input to ensure visibility */
+  flex: 1;
+  min-width: 6rem;
 }
 
 .item-name-input {
   flex-grow: 3;
-  min-width: 10rem; /* 160px */
+  min-width: 150px;
 }
-
 .quantity-input {
   flex-grow: 0.8;
-  min-width: 4rem; /* 64px */
+  min-width: 60px;
   text-align: right;
 }
-
 .unit-select {
   flex-grow: 1;
-  min-width: 6rem; /* 96px */
+  min-width: 90px;
   background-color: #ffffff;
   cursor: pointer;
 }
-
+.subcategory-input {
+  flex-grow: 1.5;
+  min-width: 150px;
+  order: 4;
+}
 .priority-select {
   flex-grow: 1;
-  min-width: 7.5rem; /* 120px */
+  min-width: 120px;
   background-color: #ffffff;
   cursor: pointer;
+  order: 5;
 }
-
 .add-button {
   background-color: #007bff;
   color: white;
-  padding: 0.75rem 1.25rem; /* 12px 20px */
+  padding: 0.75rem 1.25rem;
   border: none;
-  border-radius: 0.5rem; /* 8px */
+  border-radius: 0.5rem;
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
   transition: background-color 0.3s ease;
   flex: 1;
-  min-width: 9.375rem; /* 150px */
+  min-width: 150px;
+  order: 6;
 }
-
 .add-button:hover {
   background-color: #0056b3;
 }
 
 .add-item-form-error {
   position: absolute;
-  bottom: -1.5rem; /* Adjusted for better visibility */
-  left: 1rem; /* 16px */
-  width: calc(100% - 2rem); /* Full width minus padding */
-  font-size: 0.85rem;
+  bottom: -1.875rem;
+  left: 1rem;
+  width: calc(100% - 2rem);
+  font-size: 0.9rem;
   color: #dc3545;
   z-index: 10;
 }
@@ -157,43 +202,43 @@ body {
 .list-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Relative gap */
+  gap: 1.5rem;
 }
 
 .empty-list-message {
   text-align: center;
-  padding: 2.5rem; /* 40px */
+  padding: 2.5rem;
   background-color: #f8f9fa;
-  border-radius: 0.625rem; /* 10px */
+  border-radius: 0.625rem;
   color: #6c757d;
   font-size: 1.1rem;
-  box-shadow: 0 0.0625rem 0.3125rem rgba(0,0,0,0.05); /* 1px 5px */
+  box-shadow: 0 0.0625rem 0.3125rem rgba(0,0,0,0.05);
 }
 
 /* Item Card (Base Style) */
 .item-card {
   background-color: #ffffff;
   border: 1px solid #e0e6ed;
-  border-radius: 0.625rem; /* 10px */
-  padding: 1.25rem 1.5625rem; /* 20px 25px */
-  box-shadow: 0 0.25rem 0.9375rem rgba(0, 0, 0, 0.06); /* 4px 15px */
+  border-radius: 0.625rem;
+  padding: 1.25rem 1.5625rem;
+  box-shadow: 0 0.25rem 0.9375rem rgba(0, 0, 0, 0.06);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .item-card:hover {
-  transform: translateY(-0.1875rem); /* -3px */
-  box-shadow: 0 0.375rem 1.25rem rgba(0, 0, 0, 0.1); /* 6px 20px */
+  transform: translateY(-0.1875rem);
+  box-shadow: 0 0.375rem 1.25rem rgba(0, 0, 0, 0.1);
 }
 
 .item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 0.9375rem; /* 15px */
-  margin-bottom: 0.9375rem; /* 15px */
+  padding-bottom: 0.9375rem;
+  margin-bottom: 0.9375rem;
   border-bottom: 1px solid #e9ecef;
   flex-wrap: wrap;
-  gap: 0.625rem; /* 10px */
+  gap: 0.625rem;
 }
 
 .item-name {
@@ -203,24 +248,36 @@ body {
   display: flex;
   align-items: center;
   flex-grow: 1;
-  min-width: 50%; /* Allow wrapping */
+  min-width: 50%;
+  flex-wrap: wrap;
 }
 
 .item-quantity-display {
-  font-size: 0.8em; /* Relative to item-name font-size */
+  font-size: 0.8em;
   font-weight: normal;
   color: #555;
-  margin-left: 0.5rem; /* 8px */
+  margin-left: 0.5rem;
   white-space: nowrap;
+}
+
+.item-subcategory {
+  font-size: 0.7em;
+  color: #777;
+  background-color: #f0f8ff;
+  padding: 0.2em 0.5em;
+  border-radius: 0.3em;
+  margin-left: 0.5rem;
+  white-space: nowrap;
+  border: 1px solid #d0e7ff;
 }
 
 .priority-tag {
   font-size: 0.85rem;
-  padding: 0.3125rem 0.75rem; /* 5px 12px */
-  border-radius: 1.25rem; /* 20px */
+  padding: 0.3125rem 0.75rem;
+  border-radius: 1.25rem;
   color: white;
   font-weight: 700;
-  margin-left: 0.9375rem; /* 15px */
+  margin-left: 0.9375rem;
   display: inline-block;
   white-space: nowrap;
 }
@@ -232,16 +289,16 @@ body {
 
 .item-actions {
   display: flex;
-  gap: 0.625rem; /* 10px */
+  gap: 0.625rem;
 }
 
 .action-button {
   background-color: #6c757d;
   color: white;
   border: none;
-  border-radius: 0.3125rem; /* 5px */
-  width: 2.375rem; /* 38px */
-  height: 2.375rem; /* 38px */
+  border-radius: 0.3125rem;
+  width: 2.375rem;
+  height: 2.375rem;
   cursor: pointer;
   font-size: 1.1rem;
   display: flex;
@@ -272,57 +329,62 @@ body {
 .item-edit-mode-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.625rem; /* 10px */
+  gap: 0.625rem;
   align-items: center;
   flex-grow: 1;
   position: relative;
 }
 .edit-input, .edit-select {
-  padding: 0.5rem 0.625rem; /* 8px 10px */
+  padding: 0.5rem 0.625rem;
   border: 1px solid #b3d9ff;
-  border-radius: 0.3125rem; /* 5px */
+  border-radius: 0.3125rem;
   font-size: 1.1rem;
   background-color: #ffffff;
 }
 
 .item-name-edit {
-  flex-basis: 100%; /* Full width */
+  flex-basis: 100%;
   order: 1;
 }
 
 .quantity-unit-edit-group {
   display: flex;
-  gap: 0.5rem; /* 8px */
+  gap: 0.5rem;
   flex-grow: 1;
   order: 2;
 }
 .quantity-edit-input {
-  flex-basis: 3.75rem; /* 60px */
+  flex-basis: 3.75rem;
   text-align: right;
-  min-width: 3.75rem; /* 60px */
-  max-width: 6.25rem; /* 100px */
+  min-width: 3.75rem;
+  max-width: 6.25rem;
 }
 .unit-edit-select {
   flex-grow: 1;
-  min-width: 5rem; /* 80px */
+  min-width: 5rem;
+}
+.subcategory-edit-input {
+  flex-grow: 1;
+  order: 2.5;
+  min-width: 100px;
 }
 .priority-edit-select {
   flex-grow: 1;
   order: 3;
-  min-width: 6.25rem; /* 100px */
+  min-width: 6.25rem;
 }
 .edit-actions {
   display: flex;
-  gap: 0.625rem; /* 10px */
+  gap: 0.625rem;
   order: 4;
   margin-left: auto;
   white-space: nowrap;
 }
 
 .save-button, .cancel-button {
-  padding: 0.5rem 0.9375rem; /* 8px 15px */
+  padding: 0.5rem 0.9375rem;
   border: none;
-  border-radius: 0.3125rem; /* 5px */
+  border-radius: 0.3125rem;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background-color 0.3s ease;
@@ -348,22 +410,22 @@ body {
   position: static;
   flex-basis: 100%;
   order: 2.5;
-  margin-top: -0.3125rem; /* -5px */
+  margin-top: -0.3125rem;
 }
 
 /* Market Prices Section (Planning Mode) */
 .market-prices h4 {
   color: #495057;
-  margin-top: 0.9375rem; /* 15px */
-  margin-bottom: 0.625rem; /* 10px */
+  margin-top: 0.9375rem;
+  margin-bottom: 0.625rem;
   border-bottom: 1px dashed #e9ecef;
-  padding-bottom: 0.5rem; /* 8px */
+  padding-bottom: 0.5rem;
 }
 
 .no-prices-text {
   font-style: italic;
   color: #7f8c8d;
-  margin-left: 0.625rem; /* 10px */
+  margin-left: 0.625rem;
 }
 
 .market-prices ul {
@@ -376,7 +438,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0; /* 8px */
+  padding: 0.5rem 0;
   border-bottom: 1px dotted #f0f0f0;
   color: #555;
   font-size: 0.95rem;
@@ -398,8 +460,8 @@ body {
   background-color: #dc3545;
   color: white;
   border: none;
-  border-radius: 0.3125rem; /* 5px */
-  padding: 0.3125rem 0.625rem; /* 5px 10px */
+  border-radius: 0.3125rem;
+  padding: 0.3125rem 0.625rem;
   cursor: pointer;
   font-size: 0.75rem;
   transition: background-color 0.3s ease;
@@ -410,12 +472,12 @@ body {
 
 /* Cheapest Market Info (Planning Mode) */
 .cheapest-market-info {
-  margin-top: 1.25rem; /* 20px */
-  padding: 0.75rem 1.125rem; /* 12px 18px */
+  margin-top: 1.25rem;
+  padding: 0.75rem 1.125rem;
   background-color: #d4edda;
   color: #155724;
   border: 1px solid #c3e6cb;
-  border-radius: 0.5rem; /* 8px */
+  border-radius: 0.5rem;
   font-weight: bold;
   font-size: 1.1rem;
   display: flex;
@@ -433,7 +495,7 @@ body {
 
 .best-price-indicator {
   font-size: 1.4rem;
-  margin-left: 0.625rem; /* 10px */
+  margin-left: 0.625rem;
   color: #218838;
 }
 
@@ -441,9 +503,9 @@ body {
 .add-market-price-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.625rem; /* 10px */
-  margin-top: 1.25rem; /* 20px */
-  padding-top: 0.9375rem; /* 15px */
+  gap: 0.625rem;
+  margin-top: 1.25rem;
+  padding-top: 0.9375rem;
   border-top: 1px solid #eee;
   position: relative;
 }
@@ -451,24 +513,24 @@ body {
 .market-input,
 .price-input {
   flex-grow: 1;
-  padding: 0.625rem 0.75rem; /* 10px 12px */
+  padding: 0.625rem 0.75rem;
   border: 1px solid #ddd;
-  border-radius: 0.375rem; /* 6px */
+  border-radius: 0.375rem;
   font-size: 0.95rem;
-  min-width: 6.25rem; /* 100px */
+  min-width: 6.25rem;
 }
 
 .add-price-button {
   background-color: #28a745;
   color: white;
   border: none;
-  border-radius: 0.375rem; /* 6px */
-  padding: 0.625rem 0.9375rem; /* 10px 15px */
+  border-radius: 0.375rem;
+  padding: 0.625rem 0.9375rem;
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
   transition: background-color 0.3s ease;
-  min-width: 6.25rem; /* 100px */
+  min-width: 6.25rem;
 }
 .add-price-button:hover {
   background-color: #218838;
@@ -483,16 +545,16 @@ body {
 .input-error-message {
   color: #dc3545;
   font-size: 0.85rem;
-  margin-top: 0.3125rem; /* 5px */
+  margin-top: 0.3125rem;
   position: absolute;
-  bottom: -1.25rem; /* -20px */
+  bottom: -1.25rem;
   left: 0;
   width: 100%;
   text-align: left;
 }
 /* Adjust specific for top add item form error */
 .add-item-form .input-error-message {
-  bottom: -1.875rem; /* -30px to clear inputs above */
+  bottom: -1.875rem;
   left: 1rem;
   width: calc(100% - 2rem);
   position: absolute;
@@ -500,41 +562,41 @@ body {
 }
 .edit-error-message {
   position: static;
-  margin-top: 0.3125rem; /* 5px */
+  margin-top: 0.3125rem;
 }
 
 
 /* Market Mode Specific Styles */
 .market-mode-view {
-  padding-top: 1.25rem; /* 20px */
+  padding-top: 1.25rem;
 }
 
 .current-market-selection {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.625rem; /* 10px */
-  padding: 1.25rem; /* 20px */
+  gap: 0.625rem;
+  padding: 1.25rem;
   background-color: #e6f7ff;
   border: 1px solid #b3e0ff;
-  border-radius: 0.625rem; /* 10px */
-  margin-bottom: 1.5625rem; /* 25px */
+  border-radius: 0.625rem;
+  margin-bottom: 1.5625rem;
   align-items: center;
 }
 
 .current-market-input {
   flex-grow: 1;
-  padding: 0.75rem 0.9375rem; /* 12px 15px */
+  padding: 0.75rem 0.9375rem;
   border: 1px solid #a3d0ff;
-  border-radius: 0.5rem; /* 8px */
+  border-radius: 0.5rem;
   font-size: 1rem;
-  min-width: 11.25rem; /* 180px */
+  min-width: 11.25rem;
 }
 
 .set-market-button,
 .clear-market-button {
-  padding: 0.75rem 1.25rem; /* 12px 20px */
+  padding: 0.75rem 1.25rem;
   border: none;
-  border-radius: 0.5rem; /* 8px */
+  border-radius: 0.5rem;
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
@@ -560,27 +622,27 @@ body {
 
 .market-mode-instruction {
   text-align: center;
-  padding: 1.25rem; /* 20px */
+  padding: 1.25rem;
   background-color: #f8f9fa;
-  border-radius: 0.5rem; /* 8px */
+  border-radius: 0.5rem;
   color: #6c757d;
   font-size: 1rem;
-  margin-top: -0.625rem; /* -10px */
-  margin-bottom: 1.5625rem; /* 25px */
+  margin-top: -0.625rem;
+  margin-bottom: 1.5625rem;
   border: 1px solid #e9ecef;
 }
 
 .market-mode-info {
   text-align: center;
-  margin-bottom: 1.875rem; /* 30px */
-  padding: 1.25rem; /* 20px */
+  margin-bottom: 1.875rem;
+  padding: 1.25rem;
   background-color: #d1ecf1;
   border: 1px solid #bee5eb;
-  border-radius: 0.625rem; /* 10px */
+  border-radius: 0.625rem;
 }
 
 .market-mode-info p {
-  margin: 0 0 0.625rem 0; /* 10px */
+  margin: 0 0 0.625rem 0;
   font-size: 1.1rem;
   color: #0c5460;
 }
@@ -597,61 +659,73 @@ body {
 
 /* Styling for item cards in Market Mode */
 .market-mode-card {
-  border-left: 0.5rem solid #007bff; /* 8px */
-  padding: 0.9375rem 1.25rem; /* 15px 20px */
+  border-left: 0.5rem solid #007bff;
+  padding: 0.9375rem 1.25rem;
 }
 
 .market-mode-header {
   justify-content: flex-start;
-  gap: 0.9375rem; /* 15px */
+  gap: 0.9375rem;
   align-items: center;
 }
 
 .item-cart-checkbox {
-  width: 1.5625rem; /* 25px */
-  height: 1.5625rem; /* 25px */
+  width: 1.5625rem;
+  height: 1.5625rem;
   min-width: 1.5625rem;
   min-height: 1.5625rem;
   cursor: pointer;
-  transform: scale(1.1); /* Slightly smaller scale than previous 1.3 to not overpower layout on mobile */
+  transform: scale(1.1);
   accent-color: #28a745;
 }
 
 .item-name-market-mode {
   font-size: 1.4rem;
   flex-grow: 1;
-  margin-right: 0.9375rem; /* 15px */
+  margin-right: 0.9375rem;
   color: #34495e;
+  flex-wrap: wrap;
 }
 
 .item-quantity-display-market {
-  font-size: 0.7em; /* Relative to item-name-market-mode font-size */
+  font-size: 0.7em;
   font-weight: normal;
   color: #777;
-  margin-left: 0.3125rem; /* 5px */
+  margin-left: 0.3125rem;
+}
+
+.item-subcategory-market {
+  font-size: 0.65em;
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  padding: 0.2em 0.5em;
+  border-radius: 0.3em;
+  margin-left: 0.3125rem;
+  white-space: nowrap;
+  border: 1px solid #faebcc;
 }
 
 .market-mode-priority {
   font-size: 0.9rem;
-  padding: 0.25rem 0.625rem; /* 4px 10px */
+  padding: 0.25rem 0.625rem;
   white-space: nowrap;
 }
 
 .current-market-price-edit {
-  margin-top: 0.9375rem; /* 15px */
-  padding: 0.625rem 0; /* 10px */
+  margin-top: 0.9375rem;
+  padding: 0.625rem 0;
   border-bottom: 1px dashed #e9ecef;
   border-top: 1px dashed #e9ecef;
-  margin-bottom: 0.9375rem; /* 15px */
+  margin-bottom: 0.9375rem;
   position: relative;
 }
 .current-market-price-edit label.current-market-label {
   display: flex;
   align-items: center;
-  gap: 0.625rem; /* 10px */
+  gap: 0.625rem;
   font-weight: 600;
   color: #495057;
-  margin-bottom: 0.5rem; /* 8px */
+  margin-bottom: 0.5rem;
   flex-wrap: wrap;
 }
 .current-market-price-edit .market-name-highlight {
@@ -659,18 +733,18 @@ body {
 }
 
 .market-mode-price-input {
-  padding: 0.5rem 0.625rem; /* 8px 10px */
+  padding: 0.5rem 0.625rem;
   border: 1px solid #b3d9ff;
-  border-radius: 0.375rem; /* 6px */
+  border-radius: 0.375rem;
   font-size: 1rem;
   flex-grow: 1;
-  min-width: 5rem; /* 80px */
+  min-width: 5rem;
   text-align: right;
 }
 
 .price-error-market-mode {
   position: static;
-  margin-top: 0.3125rem; /* 5px */
+  margin-top: 0.3125rem;
   text-align: right;
   width: auto;
   display: block;
@@ -680,16 +754,16 @@ body {
   font-style: italic;
   color: #888;
   text-align: center;
-  padding: 0.9375rem; /* 15px */
+  padding: 0.9375rem;
   background-color: #f8f9fa;
-  border-radius: 0.5rem; /* 8px */
+  border-radius: 0.5rem;
 }
 
 .other-market-prices-comparison {
-  margin-top: 0.9375rem; /* 15px */
+  margin-top: 0.9375rem;
   background-color: #f8f9fa;
-  padding: 0.9375rem; /* 15px */
-  border-radius: 0.5rem; /* 8px */
+  padding: 0.9375rem;
+  border-radius: 0.5rem;
   border: 1px solid #e9ecef;
 }
 
@@ -697,8 +771,8 @@ body {
   margin-top: 0;
   color: #0056b3;
   border-bottom: 1px dotted #cce0ff;
-  padding-bottom: 0.3125rem; /* 5px */
-  margin-bottom: 0.625rem; /* 10px */
+  padding-bottom: 0.3125rem;
+  margin-bottom: 0.625rem;
 }
 
 .other-market-prices-comparison ul {
@@ -710,7 +784,7 @@ body {
 .other-market-prices-comparison li {
   display: flex;
   justify-content: space-between;
-  padding: 0.3125rem 0; /* 5px */
+  padding: 0.3125rem 0;
   color: #555;
   font-size: 0.9rem;
 }
@@ -722,28 +796,26 @@ body {
   color: #7f8c8d;
   margin-left: 0;
   text-align: center;
-  padding: 0.625rem 0; /* 10px */
+  padding: 0.625rem 0;
 }
 
 
 /* --- Responsive Adjustments --- */
 
 /* For screens smaller than 768px */
-@media (max-width: 48rem) { /* 768px / 16 = 48rem */
+@media (max-width: 48rem) {
   .container {
-      margin: 1rem; /* 16px */
-      padding: 1rem; /* 16px */
+      margin: 1rem;
+      padding: 1rem;
   }
-
   .header {
       font-size: 1.8rem;
       margin-bottom: 1.5rem;
   }
 
-  /* Adjust button sizing in mode toggle */
   .mode-toggle-container {
       flex-direction: column;
-      gap: 0.75rem; /* 12px */
+      gap: 0.75rem;
   }
   .mode-button {
       max-width: 100%;
@@ -751,76 +823,86 @@ body {
       padding: 0.75rem 1rem;
   }
 
-  /* Adjust form layout on small screens */
+  /* Adjust filter controls layout */
+  .filter-controls-container {
+      flex-direction: column;
+      gap: 0.75rem;
+  }
+  .search-input, .subcategory-filter-select {
+      width: 100%;
+      min-width: unset;
+      font-size: 0.95rem;
+      padding: 0.75rem;
+  }
+
   .add-item-form, .current-market-selection {
       flex-direction: column;
-      align-items: stretch; /* Stretch children to fill container */
-      gap: 0.75rem; /* Smaller gap */
+      align-items: stretch;
+      gap: 0.75rem;
   }
 
-  .item-name-input, .quantity-input, .unit-select, .priority-select,
-  .add-button, .current-market-input, .set-market-button, .clear-market-button {
-      width: 100%;
-      min-width: unset; /* Remove explicit min-width */
-      font-size: 0.95rem;
-      padding: 0.75rem; /* Unified padding */
-  }
-  /* Specific order for form fields */
-  .item-name-input { order: 1; }
-  .quantity-input { order: 2; }
-  .unit-select { order: 3; }
-  .priority-select { order: 4; }
-  .add-button { order: 5; }
-  .add-item-form-error { order: 6; }
-
+  /* Redefine order and width for Add Item Form elements on small screens */
+  .item-name-input { order: 1; width: 100%; min-width: unset; flex-grow: 1; }
+  .quantity-input { order: 2; width: 100%; min-width: unset; flex-grow: 1; }
+  .unit-select { order: 3; width: 100%; min-width: unset; flex-grow: 1; }
+  .subcategory-input { order: 4; width: 100%; min-width: unset; flex-grow: 1; }
+  .priority-select { order: 5; width: 100%; min-width: unset; flex-grow: 1; }
+  .add-button { order: 6; width: 100%; min-width: unset; flex-grow: 1; }
+  .add-item-form-error { order: 7; width: calc(100% - 2rem); left: 1rem; }
 
   /* Item Header in Cards */
   .item-header {
-      flex-direction: column; /* Stack elements */
-      align-items: flex-start; /* Align left */
+      flex-direction: column;
+      align-items: flex-start;
       gap: 0.5rem;
   }
   .item-name {
       font-size: 1.3rem;
       width: 100%;
-      justify-content: space-between; /* Space out name and quantity-display */
+      justify-content: space-between;
       align-items: flex-start;
-      flex-wrap: wrap; /* allow name/qty to wrap */
+      flex-wrap: wrap;
+  }
+  .item-quantity-display, .item-subcategory {
+      flex-basis: auto;
+      margin-left: 0.5rem;
+      margin-top: 0;
+      font-size: 0.85em;
+  }
+  .item-subcategory {
+       order: 1;
   }
   .item-quantity-display {
-      flex-basis: 100%; /* Push quantity below name if it gets too long */
-      margin-left: 0;
-      margin-top: 0.3125rem; /* 5px */
-      font-size: 0.85em;
+      order: 2;
   }
   .priority-tag {
       margin-left: 0;
-      margin-top: 0.625rem; /* 10px */
+      margin-top: 0.625rem;
       font-size: 0.8rem;
   }
   .item-actions {
       width: 100%;
-      justify-content: flex-end; /* Push action buttons to right */
-      gap: 0.75rem; /* 12px */
+      justify-content: flex-end;
+      gap: 0.75rem;
   }
 
   /* Edit Mode within cards */
   .item-edit-mode-container {
       flex-direction: column;
-      align-items: stretch; /* Stretch all items */
+      align-items: stretch;
       gap: 0.75rem;
   }
-  .item-name-edit, .quantity-unit-edit-group, .priority-edit-select, .edit-actions {
+  .item-name-edit, .quantity-unit-edit-group, .subcategory-edit-input, .priority-edit-select, .edit-actions {
       width: 100%;
-      flex-basis: auto; /* Reset flex basis */
+      flex-basis: auto;
       margin-left: 0 !important;
       margin-right: 0 !important;
       max-width: unset;
-      font-size: 1rem; /* Ensure inputs are readable */
+      font-size: 1rem;
       padding: 0.625rem;
   }
   .quantity-unit-edit-group {
-      flex-direction: row; /* Keep these side-by-side if possible */
+      flex-direction: row;
       gap: 0.5rem;
   }
   .save-button, .cancel-button {
@@ -835,13 +917,13 @@ body {
   }
   .market-mode-header {
       flex-wrap: wrap;
-      flex-direction: row; /* Horizontal flow for checkmark, name, priority */
+      flex-direction: row;
       justify-content: flex-start;
       align-items: center;
   }
   .item-cart-checkbox {
       order: -1;
-      margin-right: 0.625rem; /* 10px */
+      margin-right: 0.625rem;
   }
   .item-name-market-mode {
       font-size: 1.2rem;
@@ -851,20 +933,29 @@ body {
       width: auto;
       flex-grow: 1;
   }
+  .item-quantity-display-market {
+      font-size: 0.6em;
+      margin-left: 0.2rem;
+  }
+  .item-subcategory-market {
+      font-size: 0.6em;
+      margin-left: 0.2rem;
+      margin-top: 0;
+  }
   .market-mode-priority {
       margin-left: auto;
-      order: 1; /* Place after item name */
+      order: 1;
       align-self: center;
   }
 
   .current-market-price-edit label.current-market-label {
-      flex-direction: column; /* Stack label elements */
+      flex-direction: column;
       align-items: flex-start;
       gap: 0.5rem;
   }
   .market-mode-price-input {
       width: 100%;
-      flex-grow: 1; /* Allow price input to take full width */
+      flex-grow: 1;
       margin-top: 0.5rem;
       margin-left: 0;
       font-size: 0.95rem;
@@ -880,7 +971,7 @@ body {
 }
 
 /* For very small screens (e.g., ~320px width) */
-@media (max-width: 25rem) { /* 400px / 16 = 25rem */
+@media (max-width: 25rem) {
   .header {
       font-size: 1.5rem;
   }
@@ -888,8 +979,8 @@ body {
       padding: 1rem;
       gap: 0.5rem;
   }
-  .item-name-input, .quantity-input, .unit-select, .priority-select, .add-button {
-      padding: 0.6rem; /* Slightly smaller for tighter fit */
+  .item-name-input, .quantity-input, .unit-select, .subcategory-input, .priority-select, .add-button {
+      padding: 0.6rem;
   }
   .item-name {
       font-size: 1.1rem;
@@ -912,7 +1003,7 @@ body {
   }
   .item-edit-mode-container .save-button,
   .item-edit-mode-container .cancel-button {
-      flex-basis: calc(50% - 0.25rem); /* Adjust for smaller gap */
+      flex-basis: calc(50% - 0.25rem);
   }
   .current-market-selection {
       padding: 1rem;
@@ -922,12 +1013,16 @@ body {
       padding: 0.6rem;
       font-size: 0.9rem;
   }
-}
-
-/* Base styles for forms/inputs, often good to declare upfront to be overridden by more specific media queries */
-input[type="text"],
-input[type="number"],
-select {
-  width: 100%;
-  box-sizing: border-box; /* Include padding/border in element's total width/height */
+  .item-name-market-mode {
+      flex-basis: 100%;
+      font-size: 1.1rem;
+  }
+  .item-quantity-display-market, .item-subcategory-market {
+      font-size: 0.7em;
+      flex-basis: auto;
+  }
+  .item-subcategory-market {
+      margin-left: 0;
+      margin-top: 5px;
+  }
 }

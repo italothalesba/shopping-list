@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import './App.css'; // Importa o arquivo CSS
-import { db } from './firebaseConfig'; // NEW: Import your Firebase Firestore instance
+import React, { useState, useEffect, useMemo } from 'react';
+import './App.css';
+import { db } from './firebaseConfig';
 import {
   collection,
   addDoc,
@@ -10,17 +10,15 @@ import {
   doc,
   query,
   orderBy,
-  // We'll use these to specifically query/interact with documents
-} from 'firebase/firestore'; // NEW: Firestore functions
+  writeBatch
+} from 'firebase/firestore';
 
-// Helper para ordem de prioridade
 const PRIORITY_ORDER = {
   'Alta': 1,
   'Média': 2,
   'Baixa': 3,
 };
 
-// Firestore collection reference
 const shoppingItemsCollectionRef = collection(db, "shoppingItems");
 
 // =============================
@@ -28,29 +26,27 @@ const shoppingItemsCollectionRef = collection(db, "shoppingItems");
 // =============================
 function ShoppingItemCard({
     item,
-    onDeleteItem, // Will pass ID, needs to be changed in App to handle Firestore ID
-    onUpdateItem, // Will pass ID, needs to be changed in App to handle Firestore ID
+    onDeleteItem,
+    onUpdateItem,
     onAddOrUpdateMarketPrice,
-    onDeleteMarketPrice, // Will pass ID, needs to be changed in App to handle Firestore ID
+    onDeleteMarketPrice,
     isMarketMode,
     currentMarketForShopping,
-    onToggleInCart, // Will pass ID, needs to be changed in App to handle Firestore ID
-}) {
-    // Existing states for editing in Planning Mode
+    onToggleInCart,
+}) { // availableSubcategories prop is no longer passed to individual cards as dropdown is in App component.
     const [isEditing, setIsEditing] = useState(false);
     const [editedName, setEditedName] = useState(item.name);
     const [editedPriority, setEditedPriority] = useState(item.priority);
     const [editedQuantity, setEditedQuantity] = useState(item.quantity);
     const [editedUnit, setEditedUnit] = useState(item.unit);
+    const [editedSubcategory, setEditedSubcategory] = useState(item.subcategory || '');
     const [editedQuantityError, setEditedQuantityError] = useState('');
 
-    // States for adding market prices in Planning Mode
     const [marketNameInput, setMarketNameInput] = useState('');
-    const [priceInput, setPriceInput] = useState(''); // This is for price per unit/gram/kilo
+    const [priceInput, setPriceInput] = useState('');
     const [priceInputError, setPriceInputError] = useState('');
     const [marketNameInputError, setMarketNameInputError] = useState('');
 
-    // State for editing current market price in Market Mode
     const [currentMarketPriceEdit, setCurrentMarketPriceEdit] = useState(() => {
         if (isMarketMode && currentMarketForShopping) {
             const currentMarketData = item.markets.find(m => m.marketName.toLowerCase() === currentMarketForShopping.toLowerCase());
@@ -59,30 +55,26 @@ function ShoppingItemCard({
         return '';
     });
 
-    // Effect to update internal edit states and market price edit state when item props change
     useEffect(() => {
-        // Update price for current market for shopping if market mode is active
         if (isMarketMode && currentMarketForShopping) {
             const currentMarketData = item.markets.find(m => m.marketName.toLowerCase() === currentMarketForShopping.toLowerCase());
             setCurrentMarketPriceEdit(currentMarketData ? currentMarketData.price.toFixed(2) : '');
         } else {
             setCurrentMarketPriceEdit('');
         }
-        // Always update internal edit states for planning mode
         setEditedName(item.name);
         setEditedPriority(item.priority);
         setEditedQuantity(item.quantity);
         setEditedUnit(item.unit);
-    }, [isMarketMode, currentMarketForShopping, item.markets, item.name, item.priority, item.quantity, item.unit]);
+        setEditedSubcategory(item.subcategory || '');
+    }, [isMarketMode, currentMarketForShopping, item.markets, item.name, item.priority, item.quantity, item.unit, item.subcategory]);
 
 
-    // Calculate the cheapest market for Planning Mode display
     const cheapestMarket = item.markets.length > 0
         ? item.markets.reduce((prev, current) => prev.price < current.price ? prev : current)
         : null;
 
-    // Handles saving item edits (Planning Mode)
-    const handleEditSave = async () => { // Make async
+    const handleEditSave = async () => {
         let valid = true;
         if (!editedName.trim()) {
             alert('O nome do item não pode ser vazio!');
@@ -98,14 +90,19 @@ function ShoppingItemCard({
         }
 
         if (valid) {
-            // Firestore update call instead of direct state update
-            await onUpdateItem(item.id, editedName.trim(), editedPriority, parsedQuantity, editedUnit);
-            setIsEditing(false); // Exit edit mode
+            await onUpdateItem(
+                item.id,
+                editedName.trim(),
+                editedPriority,
+                parsedQuantity,
+                editedUnit,
+                editedSubcategory.trim() || null
+            );
+            setIsEditing(false);
         }
     };
 
-    // Handles submitting new market price (Planning Mode) - price per unit
-    const handleAddPriceSubmit = async (e) => { // Make async
+    const handleAddPriceSubmit = async (e) => {
         e.preventDefault();
 
         let valid = true;
@@ -125,36 +122,31 @@ function ShoppingItemCard({
         }
 
         if (valid) {
-            // Firestore update call
             await onAddOrUpdateMarketPrice(item.id, marketNameInput.trim(), parsedPrice);
-            setMarketNameInput(''); // Clear input
-            setPriceInput(''); // Clear input
+            setMarketNameInput('');
+            setPriceInput('');
         }
     };
 
-    // Handles updating the price in the current shopping market (Market Mode) - price per unit
-    const handleUpdateCurrentMarketPrice = async () => { // Make async
-        if (!currentMarketForShopping) return; // Only if a market is selected
+    const handleUpdateCurrentMarketPrice = async () => {
+        if (!currentMarketForShopping) return;
 
         const parsedPrice = parseFloat(currentMarketPriceEdit);
         if (isNaN(parsedPrice) || parsedPrice < 0) {
             setPriceInputError('Preço inválido (deve ser um número positivo ou zero para item não encontrado).');
         } else {
-            // Firestore update call
             await onAddOrUpdateMarketPrice(item.id, currentMarketForShopping, parsedPrice);
-            setPriceInputError(''); // Clear any previous error
+            setPriceInputError('');
         }
     };
 
-    // Dynamic CSS class for priority tag color
     const priorityColorClass = `priority-${item.priority.toLowerCase()}`;
 
-    // --- RENDERIZANDO PARA MODO DE PLANEJAMENTO ---
     if (!isMarketMode) {
         return (
             <div className="item-card">
                 <div className="item-header">
-                    {isEditing ? ( // Edit mode UI
+                    {isEditing ? (
                         <div className="item-edit-mode-container">
                             <input
                                 type="text"
@@ -185,6 +177,16 @@ function ShoppingItemCard({
                                 </select>
                             </div>
                             {editedQuantityError && <div className="input-error-message edit-error-message">{editedQuantityError}</div>}
+                            <input
+                                type="text"
+                                placeholder="Subcategoria (opcional)"
+                                value={editedSubcategory}
+                                onChange={(e) => setEditedSubcategory(e.target.value)}
+                                className="edit-input subcategory-edit-input"
+                                aria-label="Editar subcategoria do item"
+                                list="available-subcategories"
+                            />
+
                             <select
                                 value={editedPriority}
                                 onChange={(e) => setEditedPriority(e.target.value)}
@@ -211,16 +213,17 @@ function ShoppingItemCard({
                                 <span className="item-quantity-display">
                                     ({item.quantity} {item.unit})
                                 </span>
+                                {item.subcategory && <span className="item-subcategory">({item.subcategory})</span>}
                                 <span className={`priority-tag ${priorityColorClass}`}>
                                     {item.priority}
                                 </span>
                             </h3>
                             <div className="item-actions">
                                 <button onClick={() => setIsEditing(true)} className="action-button edit-button" aria-label={`Editar ${item.name}`}>
-                                    &#9998; {/* Pencil icon */}
+                                    &#9998;
                                 </button>
                                 <button onClick={() => onDeleteItem(item.id)} className="action-button delete-button" aria-label={`Deletar ${item.name}`}>
-                                    &#128465; {/* Trash icon */}
+                                    &#128465;
                                 </button>
                             </div>
                         </>
@@ -250,7 +253,7 @@ function ShoppingItemCard({
                     )}
                 </div>
 
-                {cheapestMarket && ( // Display general cheapest market info
+                {cheapestMarket && (
                     <div className="cheapest-market-info">
                         <strong>Melhor Preço Geral:</strong>{' '}
                         <span className="cheapest-market-name">{cheapestMarket.marketName}</span> (
@@ -280,7 +283,7 @@ function ShoppingItemCard({
                     <button type="submit" className="add-price-button" aria-label="Adicionar ou Atualizar Preço">
                         + Preço
                     </button>
-                    {(marketNameInputError || priceInputError) && ( // Display error messages
+                    {(marketNameInputError || priceInputError) && (
                         <div className="input-error-message">
                             {marketNameInputError} {priceInputError && marketNameInputError ? ' | ' : ''} {priceInputError}
                         </div>
@@ -289,11 +292,9 @@ function ShoppingItemCard({
             </div>
         );
     }
-    // --- FIM DA RENDERIZAÇÃO PARA MODO DE PLANEJAMENTO ---
 
 
     // --- RENDERIZANDO PARA MODO DE MERCADO ---
-    // Filter out prices for other markets for comparison
     const otherMarketsPrices = item.markets.filter(
         (m) => m.marketName.toLowerCase() !== currentMarketForShopping?.toLowerCase()
     );
@@ -313,6 +314,7 @@ function ShoppingItemCard({
                     <span className="item-quantity-display-market">
                         ({item.quantity} {item.unit})
                     </span>
+                    {item.subcategory && <span className="item-subcategory-market">({item.subcategory})</span>}
                 </h3>
                 <div className={`priority-tag ${priorityColorClass} market-mode-priority`}>
                     {item.priority}
@@ -329,9 +331,9 @@ function ShoppingItemCard({
                             value={currentMarketPriceEdit}
                             onChange={(e) => {
                                 setCurrentMarketPriceEdit(e.target.value);
-                                setPriceInputError(''); // Clear errors when typing
+                                setPriceInputError('');
                             }}
-                            onBlur={handleUpdateCurrentMarketPrice} // Save price on blur
+                            onBlur={handleUpdateCurrentMarketPrice}
                             className={`market-mode-price-input ${priceInputError ? 'input-error' : ''}`}
                             aria-label={`Preço para ${item.quantity} ${item.unit} de ${item.name} no mercado ${currentMarketForShopping}`}
                         />
@@ -370,7 +372,6 @@ function ShoppingItemCard({
                 )}
         </div>
     );
-    // --- FIM DA RENDERIZAÇÃO PARA MODO DE MERCADO ---
 }
 
 
@@ -378,11 +379,12 @@ function ShoppingItemCard({
 // COMPONENTE PRINCIPAL: APP
 // =============================
 function App() {
-    const [shoppingItems, setShoppingItems] = useState([]); // Initialize as empty, will load from Firestore
+    const [shoppingItems, setShoppingItems] = useState([]);
     const [newItemName, setNewItemName] = useState('');
     const [newItemPriority, setNewItemPriority] = useState('Média');
     const [newItemQuantity, setNewItemQuantity] = useState(1);
     const [newItemUnit, setNewItemUnit] = useState('unidade');
+    const [newItemSubcategory, setNewItemSubcategory] = useState('');
 
     const [newItemNameError, setNewItemNameError] = useState('');
     const [newItemQuantityError, setNewItemQuantityError] = useState('');
@@ -391,32 +393,55 @@ function App() {
     const [currentMarketForShopping, setCurrentMarketForShopping] = useState('');
     const [currentMarketInput, setCurrentMarketInput] = useState('');
 
-    // NEW: Function to fetch data from Firestore
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedSubcategoryFilter, setSelectedSubcategoryFilter] = useState(''); // NEW: State for subcategory filter
+
+    const availableSubcategories = useMemo(() => {
+        const unique = new Set(shoppingItems
+            .map(item => item.subcategory)
+            .filter(sub => sub && typeof sub === 'string' && sub.trim() !== '')
+            .map(sub => sub.trim())
+        );
+        return Array.from(unique).sort((a, b) => a.localeCompare(b));
+    }, [shoppingItems]);
+
     const getShoppingItems = async () => {
+        console.log("Attempting to fetch shopping items from Firestore...");
         try {
-            const q = query(shoppingItemsCollectionRef, orderBy('priority', 'asc')); // Order by priority
-            const data = await getDocs(q);
-            const items = data.docs.map((doc) => ({
-                ...doc.data(),
-                id: doc.id, // Firestore uses 'id' for document ID
-                isInCart: doc.data().hasOwnProperty('isInCart') ? doc.data().isInCart : false,
-                quantity: doc.data().quantity !== undefined ? doc.data().quantity : 1,
-                unit: doc.data().unit || 'unidade'
-            }));
+            const q = query(shoppingItemsCollectionRef, orderBy('priority', 'asc'), orderBy('name', 'asc'));
+            const querySnapshot = await getDocs(q);
+
+            console.log("Firestore query successful.");
+            if (querySnapshot.empty) {
+                console.log("No documents found in 'shoppingItems' collection.");
+            } else {
+                console.log(`Found ${querySnapshot.docs.length} documents.`);
+            }
+
+            const items = querySnapshot.docs.map((doc) => {
+                const data = doc.data();
+                return {
+                    ...data,
+                    id: doc.id,
+                    isInCart: data.hasOwnProperty('isInCart') ? data.isInCart : false,
+                    quantity: data.quantity !== undefined ? data.quantity : 1,
+                    unit: data.unit || 'unidade',
+                    subcategory: data.subcategory || '',
+                };
+            });
+            console.log("Fetched items: ", items);
             setShoppingItems(items);
         } catch (error) {
-            console.error("Error fetching shopping items: ", error);
+            console.error("ERROR fetching shopping items from Firestore: ", error);
+            alert("Erro ao carregar itens de compra. Verifique sua conexão ou as configurações do Firebase/Regras de Segurança.");
         }
     };
 
-    // NEW: Load items on component mount and whenever a Firestore operation implies a refresh
     useEffect(() => {
         getShoppingItems();
-    }, []); // Empty dependency array means this runs once on mount
+    }, []);
 
-
-    // Lida com a adição de um novo item
-    const handleAddItem = async (e) => { // Make async for Firestore operation
+    const handleAddItem = async (e) => {
         e.preventDefault();
 
         let valid = true;
@@ -442,30 +467,31 @@ function App() {
             priority: newItemPriority,
             quantity: parsedQuantity,
             unit: newItemUnit,
+            subcategory: newItemSubcategory.trim() || null,
             markets: [],
             isInCart: false,
         };
 
         try {
-            await addDoc(shoppingItemsCollectionRef, newItem); // Add item to Firestore
-            getShoppingItems(); // Refresh list after adding
+            await addDoc(shoppingItemsCollectionRef, newItem);
+            getShoppingItems();
             setNewItemName('');
             setNewItemPriority('Média');
             setNewItemQuantity(1);
             setNewItemUnit('unidade');
+            setNewItemSubcategory('');
         } catch (error) {
             console.error("Error adding document: ", error);
             alert("Erro ao adicionar item: " + error.message);
         }
     };
 
-    // Lida com a exclusão de um item (com confirmação)
-    const handleDeleteItem = async (id) => { // Make async
+    const handleDeleteItem = async (id) => {
         if (window.confirm('Tem certeza que deseja remover este item permanentemente?')) {
             try {
-                const itemDoc = doc(db, "shoppingItems", id); // Get specific document reference
-                await deleteDoc(itemDoc); // Delete from Firestore
-                getShoppingItems(); // Refresh list
+                const itemDoc = doc(db, "shoppingItems", id);
+                await deleteDoc(itemDoc);
+                getShoppingItems();
             } catch (error) {
                 console.error("Error deleting document: ", error);
                 alert("Erro ao deletar item: " + error.message);
@@ -473,8 +499,7 @@ function App() {
         }
     };
 
-    // Lida com a atualização do nome, prioridade, quantidade e unidade de um item
-    const handleUpdateItem = async (id, newName, newPriority, newQuantity, newUnit) => { // Make async
+    const handleUpdateItem = async (id, newName, newPriority, newQuantity, newUnit, newSubcategory) => {
         try {
             const itemDoc = doc(db, "shoppingItems", id);
             await updateDoc(itemDoc, {
@@ -482,21 +507,20 @@ function App() {
                 priority: newPriority,
                 quantity: newQuantity,
                 unit: newUnit,
+                subcategory: newSubcategory,
             });
-            getShoppingItems(); // Refresh list
+            getShoppingItems();
         } catch (error) {
             console.error("Error updating document: ", error);
             alert("Erro ao atualizar item: " + error.message);
         }
     };
 
-    // Lida com a adição ou atualização de um preço de mercado para um item
-    const handleAddOrUpdateMarketPrice = async (id, marketName, price) => { // Make async
+    const handleAddOrUpdateMarketPrice = async (id, marketName, price) => {
         try {
             const itemToUpdate = shoppingItems.find(item => item.id === id);
             if (!itemToUpdate) return;
 
-            // Deep copy markets to avoid direct mutation
             const updatedMarkets = [...itemToUpdate.markets];
             const existingMarketIndex = updatedMarkets.findIndex(m => m.marketName.toLowerCase() === marketName.toLowerCase());
 
@@ -508,16 +532,14 @@ function App() {
 
             const itemDoc = doc(db, "shoppingItems", id);
             await updateDoc(itemDoc, { markets: updatedMarkets });
-            getShoppingItems(); // Refresh list
+            getShoppingItems();
         } catch (error) {
             console.error("Error updating market price: ", error);
             alert("Erro ao atualizar preço do mercado: " + error.message);
         }
     };
 
-
-    // Lida com a exclusão de um preço de mercado de um item
-    const handleDeleteMarketPrice = async (itemId, marketName) => { // Make async
+    const handleDeleteMarketPrice = async (itemId, marketName) => {
         try {
             const itemToUpdate = shoppingItems.find(item => item.id === itemId);
             if (!itemToUpdate) return;
@@ -526,26 +548,24 @@ function App() {
 
             const itemDoc = doc(db, "shoppingItems", itemId);
             await updateDoc(itemDoc, { markets: updatedMarkets });
-            getShoppingItems(); // Refresh list
+            getShoppingItems();
         } catch (error) {
             console.error("Error deleting market price: ", error);
             alert("Erro ao deletar preço do mercado: " + error.message);
         }
     };
 
-    // Lida com a marcação/desmarcação de um item no carrinho
-    const handleToggleInCart = async (id, isInCart) => { // Make async
+    const handleToggleInCart = async (id, isInCart) => {
         try {
             const itemDoc = doc(db, "shoppingItems", id);
             await updateDoc(itemDoc, { isInCart: isInCart });
-            getShoppingItems(); // Refresh list (to reflect UI update)
+            getShoppingItems();
         } catch (error) {
             console.error("Error toggling in cart status: ", error);
             alert("Erro ao atualizar status do carrinho: " + error.message);
         }
     };
 
-    // Calcula o total dos itens no carrinho para o mercado selecionado
     const calculateMarketModeTotal = () => {
         let total = 0;
         shoppingItems.forEach(item => {
@@ -559,7 +579,6 @@ function App() {
         return total.toFixed(2);
     };
 
-    // Função para iniciar o modo mercado com o nome do mercado digitado
     const handleSetCurrentMarket = (e) => {
         e.preventDefault();
         if (currentMarketInput.trim()) {
@@ -569,35 +588,56 @@ function App() {
         }
     };
 
-    const handleClearCurrentMarket = async () => { // Make async if it resets isInCart in Firestore
+    const handleClearCurrentMarket = async () => {
         setCurrentMarketForShopping('');
         setCurrentMarketInput('');
-        // Reset all isInCart status if changing market implies a new shopping trip
-        // This is a batch update or multiple updates, keeping it simple for now
-        // A better approach would be to update isInCart locally or in a single transaction
-        const updates = shoppingItems.map(item => updateDoc(doc(db, "shoppingItems", item.id), { isInCart: false }));
+
+        const batch = writeBatch(db);
+        shoppingItems.forEach(item => {
+            if (item.isInCart) {
+                const itemRef = doc(db, "shoppingItems", item.id);
+                batch.update(itemRef, { isInCart: false });
+            }
+        });
+
         try {
-            await Promise.all(updates); // Run all updates concurrently
-            getShoppingItems(); // Refresh UI after all are reset
+            await batch.commit();
+            getShoppingItems();
         } catch (error) {
-            console.error("Error resetting isInCart status: ", error);
+            console.error("Error resetting isInCart status in batch: ", error);
             alert("Erro ao limpar carrinho: " + error.message);
         }
     };
 
+    const filteredAndSortedItems = useMemo(() => {
+        let itemsToFilter = [...shoppingItems];
 
-    // Ordena os itens da lista por prioridade para exibição (mesmo em ambos os modos)
-    // Firestore provides `orderBy` during query, so this might be redundant if Firestore sorting is always active.
-    // However, it's harmless to keep if you ever fetch without specific Firestore ordering.
-    const sortedItems = [...shoppingItems].sort((a, b) => {
-        return PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
-    });
+        // Apply search query filter
+        if (searchQuery.trim() !== '') {
+            const lowerCaseQuery = searchQuery.toLowerCase();
+            itemsToFilter = itemsToFilter.filter(item =>
+                item.name.toLowerCase().includes(lowerCaseQuery) ||
+                (item.subcategory && item.subcategory.toLowerCase().includes(lowerCaseQuery))
+            );
+        }
+
+        // NEW: Apply subcategory filter
+        if (selectedSubcategoryFilter !== '') {
+            itemsToFilter = itemsToFilter.filter(item => item.subcategory === selectedSubcategoryFilter);
+        }
+
+        // Apply sorting based on app logic, Firebase order by clauses apply first at fetch level
+        return itemsToFilter.sort((a, b) => {
+            const priorityDiff = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
+            if (priorityDiff !== 0) return priorityDiff;
+            return a.name.localeCompare(b.name);
+        });
+    }, [shoppingItems, searchQuery, selectedSubcategoryFilter]); // Dependency array includes new filter
 
     return (
         <div className="container">
             <h1 className="header">🛒 Lista de Compras Inteligente</h1>
 
-            {/* Botão de alternância de modo */}
             <div className="mode-toggle-container">
                 <button
                     onClick={() => setIsMarketMode(false)}
@@ -613,6 +653,29 @@ function App() {
                 >
                     🛒 Modo Mercado
                 </button>
+            </div>
+
+            {/* Search Bar and NEW: Subcategory Filter Dropdown */}
+            <div className="filter-controls-container"> {/* New container for filter controls */}
+                <input
+                    type="text"
+                    placeholder="Pesquisar por nome ou subcategoria..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="search-input"
+                    aria-label="Barra de pesquisa de itens"
+                />
+                <select
+                    value={selectedSubcategoryFilter}
+                    onChange={(e) => setSelectedSubcategoryFilter(e.target.value)}
+                    className="subcategory-filter-select" // New class for this select
+                    aria-label="Filtrar por subcategoria"
+                >
+                    <option value="">Todas as Subcategorias</option>
+                    {availableSubcategories.map(sub => (
+                        <option key={sub} value={sub}>{sub}</option>
+                    ))}
+                </select>
             </div>
 
             {!isMarketMode ? ( // MODO PLANEJAMENTO
@@ -646,6 +709,19 @@ function App() {
                             <option value="grama">Grama</option>
                             <option value="quilo">Quilo</option>
                         </select>
+                        <input
+                            type="text"
+                            placeholder="Subcategoria (opcional)"
+                            value={newItemSubcategory}
+                            onChange={(e) => setNewItemSubcategory(e.target.value)}
+                            className="subcategory-input"
+                            aria-label="Subcategoria do item"
+                            list="available-subcategories"
+                        />
+                        <datalist id="available-subcategories">
+                            {availableSubcategories.map(sub => <option key={sub} value={sub} />)}
+                        </datalist>
+
                         <select
                             value={newItemPriority}
                             onChange={(e) => setNewItemPriority(e.target.value)}
@@ -667,18 +743,20 @@ function App() {
                     </form>
 
                     <div className="list-container">
-                        {sortedItems.length === 0 ? (
-                            <p className="empty-list-message">Sua lista de compras está vazia. Comece adicionando um item!</p>
+                        {filteredAndSortedItems.length === 0 ? (
+                            <p className="empty-list-message">
+                                {searchQuery.trim() !== '' || selectedSubcategoryFilter !== '' ? 'Nenhum item encontrado com seus filtros.' : 'Sua lista de compras está vazia. Comece adicionando um item!'}
+                            </p>
                         ) : (
-                            sortedItems.map((item) => (
+                            filteredAndSortedItems.map((item) => (
                                 <ShoppingItemCard
-                                    key={item.id} // Firestore provides 'id' for documents
+                                    key={item.id}
                                     item={item}
                                     onDeleteItem={handleDeleteItem}
                                     onUpdateItem={handleUpdateItem}
                                     onAddOrUpdateMarketPrice={handleAddOrUpdateMarketPrice}
                                     onDeleteMarketPrice={handleDeleteMarketPrice}
-                                    isMarketMode={false} // Pass false for Planning mode
+                                    isMarketMode={false}
                                 />
                             ))
                         )}
@@ -721,10 +799,12 @@ function App() {
                     )}
 
                     <div className="list-container market-mode-list-container">
-                        {sortedItems.length === 0 ? (
-                            <p className="empty-list-message">Sua lista de compras está vazia. Adicione itens no Modo Planejamento.</p>
+                        {filteredAndSortedItems.length === 0 ? (
+                            <p className="empty-list-message">
+                                {searchQuery.trim() !== '' || selectedSubcategoryFilter !== '' ? 'Nenhum item encontrado com seus filtros.' : 'Sua lista de compras está vazia. Adicione itens no Modo Planejamento.'}
+                            </p>
                         ) : (
-                            sortedItems.map((item) => (
+                            filteredAndSortedItems.map((item) => (
                                 <ShoppingItemCard
                                     key={item.id}
                                     item={item}
@@ -744,4 +824,5 @@ function App() {
         </div>
     );
 }
+
 export default App;
