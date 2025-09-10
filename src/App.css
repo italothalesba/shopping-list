@@ -73,19 +73,19 @@ body {
   color: #34495e;
 }
 
-/* NEW: Filter Controls Container (for Search and Subcategory Filter) */
+/* Filter Controls Container (for Search and Subcategory Filter) */
 .filter-controls-container {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
   margin-bottom: 1.875rem; /* 30px */
-  padding-bottom: 0.625rem; /* 10px */
+  padding-bottom: 0.625rem;
   border-bottom: 1px solid #e9ecef;
 }
 
 .search-input {
-  flex-grow: 2; /* Allow search input to take more space */
-  min-width: 12rem; /* Minimum width */
+  flex-grow: 2;
+  min-width: 12rem;
   padding: 0.75rem 0.9375rem;
   border: 1px solid #a3d0ff;
   border-radius: 0.5rem;
@@ -102,9 +102,9 @@ body {
   outline: none;
 }
 
-.subcategory-filter-select { /* NEW: Style for subcategory filter dropdown */
-  flex-grow: 1; /* Allow dropdown to grow */
-  min-width: 8rem; /* Minimum width */
+.subcategory-filter-select {
+  flex-grow: 1;
+  min-width: 8rem;
   padding: 0.75rem 0.9375rem;
   border: 1px solid #a3d0ff;
   border-radius: 0.5rem;
@@ -711,44 +711,79 @@ body {
   white-space: nowrap;
 }
 
-.current-market-price-edit {
+/* NEW: Market Mode Quantity Control */
+.market-mode-quantity-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
   margin-top: 0.9375rem;
   padding: 0.625rem 0;
-  border-bottom: 1px dashed #e9ecef;
   border-top: 1px dashed #e9ecef;
-  margin-bottom: 0.9375rem;
-  position: relative;
-}
-.current-market-price-edit label.current-market-label {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 0.5rem;
-  flex-wrap: wrap;
-}
-.current-market-price-edit .market-name-highlight {
-  color: #0056b3;
+  position: relative; /* For error message */
 }
 
+.market-mode-quantity-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #495057;
+  flex-grow: 1; /* Allows label and input to stretch */
+}
+.market-mode-quantity-label span {
+  font-weight: normal;
+  color: #555;
+}
+.market-mode-purchased-quantity-input {
+  padding: 0.5rem 0.625rem;
+  border: 1px solid #b3d9ff;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  text-align: right;
+  width: 4rem; /* Fixed width */
+  max-width: 4rem; /* Keep it from growing too much */
+  min-width: 3rem; /* Smallest sensible size */
+  box-sizing: border-box;
+}
+
+.purchased-qty-error { /* Error for new quantity input */
+  position: absolute;
+  top: 100%; /* Position below the inputs */
+  left: 0;
+  width: 100%;
+  font-size: 0.85rem;
+  color: #dc3545;
+  margin-top: 0.3rem; /* Space from inputs */
+}
+
+/* Existing market price edit needs adjustment */
+.current-market-price-edit {
+  flex-grow: 2; /* Let it take more space if needed */
+  padding: 0; /* Remove padding as it's inside a new container now */
+  border: none; /* Remove borders */
+  margin: 0; /* Remove margin */
+}
+
+.current-market-price-edit label.current-market-label {
+  margin-bottom: 0; /* Adjust spacing */
+}
 .market-mode-price-input {
   padding: 0.5rem 0.625rem;
   border: 1px solid #b3d9ff;
   border-radius: 0.375rem;
   font-size: 1rem;
-  flex-grow: 1;
-  min-width: 5rem;
   text-align: right;
+  width: 6rem; /* Fixed width */
+  max-width: 8rem; /* Keep it from growing too much */
+  min-width: 3rem; /* Smallest sensible size */
+  box-sizing: border-box;
 }
 
 .price-error-market-mode {
-  position: static;
-  margin-top: 0.3125rem;
-  text-align: right;
-  width: auto;
-  display: block;
+  margin-top: 0; /* Adjust positioning */
 }
+
 
 .no-market-selected-text {
   font-style: italic;
@@ -823,7 +858,6 @@ body {
       padding: 0.75rem 1rem;
   }
 
-  /* Adjust filter controls layout */
   .filter-controls-container {
       flex-direction: column;
       gap: 0.75rem;
@@ -948,19 +982,45 @@ body {
       align-self: center;
   }
 
-  .current-market-price-edit label.current-market-label {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
+  /* Adjust market mode quantity/price layout */
+  .market-mode-quantity-control {
+      flex-direction: column; /* Stack quantity and price inputs */
+      gap: 0.75rem;
+      padding-bottom: 0.5rem; /* Add padding at bottom */
   }
-  .market-mode-price-input {
+  .market-mode-quantity-label, .current-market-price-edit label.current-market-label {
+      width: 100%; /* Take full width */
+      margin-bottom: 0; /* Reset margins */
+      font-size: 0.95rem; /* Consistent font size */
+      flex-wrap: wrap; /* allow its content to wrap */
+  }
+  .market-mode-purchased-quantity-input {
+      flex-grow: 1; /* Allow it to grow */
       width: 100%;
-      flex-grow: 1;
-      margin-top: 0.5rem;
-      margin-left: 0;
-      font-size: 0.95rem;
-      padding: 0.625rem;
+      max-width: unset;
+      min-width: unset;
+      text-align: right; /* keep number aligned right */
   }
+  .current-market-price-edit {
+      padding-top: 0.5rem; /* Add some space if stacking */
+      border-top: 1px dashed #e9ecef; /* Separator if stacked */
+  }
+  .current-market-price-edit .market-mode-price-input {
+      flex-grow: 1; /* Allow it to grow */
+      width: 100%;
+      max-width: unset;
+      min-width: unset;
+      text-align: right; /* keep number aligned right */
+      margin-top: 0.5rem; /* Space between label and input */
+  }
+  .purchased-qty-error {
+      position: static; /* Let it flow */
+      text-align: left; /* Align with label */
+      margin-top: -0.3rem; /* pull up */
+      font-size: 0.8rem;
+      width: 100%;
+  }
+
 
   .other-market-prices-comparison h5 {
       font-size: 1rem;

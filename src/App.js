@@ -27,13 +27,13 @@ const shoppingItemsCollectionRef = collection(db, "shoppingItems");
 function ShoppingItemCard({
     item,
     onDeleteItem,
-    onUpdateItem,
+    onUpdateItem, // Now receives subcategory parameter as well
     onAddOrUpdateMarketPrice,
     onDeleteMarketPrice,
     isMarketMode,
     currentMarketForShopping,
     onToggleInCart,
-}) { // availableSubcategories prop is no longer passed to individual cards as dropdown is in App component.
+}) {
     const [isEditing, setIsEditing] = useState(false);
     const [editedName, setEditedName] = useState(item.name);
     const [editedPriority, setEditedPriority] = useState(item.priority);
@@ -55,6 +55,11 @@ function ShoppingItemCard({
         return '';
     });
 
+    // NEW: State for market mode purchased quantity
+    const [purchasedQuantity, setPurchasedQuantity] = useState(item.quantity);
+    const [purchasedQuantityError, setPurchasedQuantityError] = useState('');
+
+    // Effect to update internal edit states and market price edit state when item props change
     useEffect(() => {
         if (isMarketMode && currentMarketForShopping) {
             const currentMarketData = item.markets.find(m => m.marketName.toLowerCase() === currentMarketForShopping.toLowerCase());
@@ -67,12 +72,30 @@ function ShoppingItemCard({
         setEditedQuantity(item.quantity);
         setEditedUnit(item.unit);
         setEditedSubcategory(item.subcategory || '');
+        setPurchasedQuantity(item.quantity); // NEW: Update purchasedQuantity on item change
     }, [isMarketMode, currentMarketForShopping, item.markets, item.name, item.priority, item.quantity, item.unit, item.subcategory]);
 
 
     const cheapestMarket = item.markets.length > 0
         ? item.markets.reduce((prev, current) => prev.price < current.price ? prev : current)
         : null;
+
+    // Handler for updating quantity in Market Mode
+    const handlePurchasedQuantityChange = async (e) => {
+        const newQty = e.target.value;
+        setPurchasedQuantity(newQty); // Update local state for immediate feedback
+
+        const parsedQty = parseFloat(newQty);
+        if (isNaN(parsedQty) || parsedQty <= 0) {
+            setPurchasedQuantityError('Qtd inválida (deve ser positiva).');
+        } else {
+            setPurchasedQuantityError('');
+            // NEW: Update the item's quantity in Firebase, so App's total calculation works.
+            // Passes current item's original name, priority, unit and subcategory
+            await onUpdateItem(item.id, item.name, item.priority, parsedQty, item.unit, item.subcategory);
+        }
+    };
+
 
     const handleEditSave = async () => {
         let valid = true;
@@ -312,7 +335,8 @@ function ShoppingItemCard({
                 <h3 className="item-name-market-mode">
                     {item.name}
                     <span className="item-quantity-display-market">
-                        ({item.quantity} {item.unit})
+                        {/* NEW: Display purchased quantity if different from item.quantity */}
+                        {purchasedQuantity} {item.unit}
                     </span>
                     {item.subcategory && <span className="item-subcategory-market">({item.subcategory})</span>}
                 </h3>
@@ -322,27 +346,48 @@ function ShoppingItemCard({
             </div>
 
             {currentMarketForShopping ? (
-                <div className="current-market-price-edit">
-                    <label className="current-market-label">
-                        Preço Unitário em "<span className="market-name-highlight">{currentMarketForShopping}</span>" (/{item.unit}):
-                        <input
-                            type="number"
-                            step="0.01"
-                            value={currentMarketPriceEdit}
-                            onChange={(e) => {
-                                setCurrentMarketPriceEdit(e.target.value);
-                                setPriceInputError('');
-                            }}
-                            onBlur={handleUpdateCurrentMarketPrice}
-                            className={`market-mode-price-input ${priceInputError ? 'input-error' : ''}`}
-                            aria-label={`Preço para ${item.quantity} ${item.unit} de ${item.name} no mercado ${currentMarketForShopping}`}
-                        />
-                    </label>
-                    {priceInputError && (
-                         <div className="input-error-message price-error-market-mode">{priceInputError}</div>
-                    )}
+                <>
+                    <div className="market-mode-quantity-control"> {/* NEW: Container for quantity and price edit */}
+                         <label className="market-mode-quantity-label">
+                            Comprar:
+                            <input
+                                type="number"
+                                min="0.01"
+                                step="0.01"
+                                value={purchasedQuantity}
+                                onChange={handlePurchasedQuantityChange}
+                                onBlur={handlePurchasedQuantityChange} // Ensure update on blur too
+                                className={`market-mode-purchased-quantity-input ${purchasedQuantityError ? 'input-error' : ''}`}
+                                aria-label={`Quantidade de ${item.name} a comprar`}
+                            />
+                            <span>{item.unit}</span>
+                        </label>
+                         {purchasedQuantityError && (
+                            <div className="input-error-message purchased-qty-error">{purchasedQuantityError}</div>
+                        )}
 
-                </div>
+                        <div className="current-market-price-edit">
+                            <label className="current-market-label">
+                                Preço Unitário em "<span className="market-name-highlight">{currentMarketForShopping}</span>" (/{item.unit}):
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={currentMarketPriceEdit}
+                                    onChange={(e) => {
+                                        setCurrentMarketPriceEdit(e.target.value);
+                                        setPriceInputError('');
+                                    }}
+                                    onBlur={handleUpdateCurrentMarketPrice}
+                                    className={`market-mode-price-input ${priceInputError ? 'input-error' : ''}`}
+                                    aria-label={`Preço para ${purchasedQuantity} ${item.unit} de ${item.name} no mercado ${currentMarketForShopping}`}
+                                />
+                            </label>
+                            {priceInputError && (
+                                 <div className="input-error-message price-error-market-mode">{priceInputError}</div>
+                            )}
+                        </div>
+                    </div>
+                </>
             ) : (
                 <p className="no-market-selected-text">Selecione um mercado acima para editar preços e somar o total.</p>
             )}
@@ -394,7 +439,7 @@ function App() {
     const [currentMarketInput, setCurrentMarketInput] = useState('');
 
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedSubcategoryFilter, setSelectedSubcategoryFilter] = useState(''); // NEW: State for subcategory filter
+    const [selectedSubcategoryFilter, setSelectedSubcategoryFilter] = useState('');
 
     const availableSubcategories = useMemo(() => {
         const unique = new Set(shoppingItems
@@ -440,6 +485,7 @@ function App() {
     useEffect(() => {
         getShoppingItems();
     }, []);
+
 
     const handleAddItem = async (e) => {
         e.preventDefault();
@@ -499,6 +545,7 @@ function App() {
         }
     };
 
+    // onUpdateItem now accepts subcategory parameter
     const handleUpdateItem = async (id, newName, newPriority, newQuantity, newUnit, newSubcategory) => {
         try {
             const itemDoc = doc(db, "shoppingItems", id);
@@ -612,7 +659,6 @@ function App() {
     const filteredAndSortedItems = useMemo(() => {
         let itemsToFilter = [...shoppingItems];
 
-        // Apply search query filter
         if (searchQuery.trim() !== '') {
             const lowerCaseQuery = searchQuery.toLowerCase();
             itemsToFilter = itemsToFilter.filter(item =>
@@ -621,18 +667,16 @@ function App() {
             );
         }
 
-        // NEW: Apply subcategory filter
         if (selectedSubcategoryFilter !== '') {
             itemsToFilter = itemsToFilter.filter(item => item.subcategory === selectedSubcategoryFilter);
         }
 
-        // Apply sorting based on app logic, Firebase order by clauses apply first at fetch level
         return itemsToFilter.sort((a, b) => {
             const priorityDiff = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
             if (priorityDiff !== 0) return priorityDiff;
             return a.name.localeCompare(b.name);
         });
-    }, [shoppingItems, searchQuery, selectedSubcategoryFilter]); // Dependency array includes new filter
+    }, [shoppingItems, searchQuery, selectedSubcategoryFilter]);
 
     return (
         <div className="container">
@@ -656,7 +700,7 @@ function App() {
             </div>
 
             {/* Search Bar and NEW: Subcategory Filter Dropdown */}
-            <div className="filter-controls-container"> {/* New container for filter controls */}
+            <div className="filter-controls-container">
                 <input
                     type="text"
                     placeholder="Pesquisar por nome ou subcategoria..."
@@ -668,7 +712,7 @@ function App() {
                 <select
                     value={selectedSubcategoryFilter}
                     onChange={(e) => setSelectedSubcategoryFilter(e.target.value)}
-                    className="subcategory-filter-select" // New class for this select
+                    className="subcategory-filter-select"
                     aria-label="Filtrar por subcategoria"
                 >
                     <option value="">Todas as Subcategorias</option>
@@ -813,7 +857,7 @@ function App() {
                                     currentMarketForShopping={currentMarketForShopping}
                                     onToggleInCart={handleToggleInCart}
                                     onDeleteItem={handleDeleteItem}
-                                    onUpdateItem={handleUpdateItem}
+                                    onUpdateItem={handleUpdateItem} // Pass to update item's quantity for total calc
                                     onDeleteMarketPrice={handleDeleteMarketPrice}
                                 />
                             ))
